@@ -299,6 +299,6 @@ app.get('/api/activities/:username', (req, res) => {
 //  START
 // ============================
 
-app.listen(PORT, () => {
-  console.log(`Blog server running at http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Blog server running at http://0.0.0.0:${PORT}`);
 });
