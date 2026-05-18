@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>发布文章 - 我的博客</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="header">
+    <div class="container">
+      <a href="index.html" class="logo">My Blog</a>
+      <nav class="nav">
+        <a href="index.html">首页</a>
+        <a href="about.html">关于</a>
+        <a href="admin.html" class="active">发布</a>
+        <a href="profile.html" id="navProfile" style="display:none">个人主页</a>
+      </nav>
+      <button id="themeToggle" class="theme-toggle" aria-label="切换主题">🌙</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Login / Register -->
+    <section id="loginForm" class="admin-section auth-view">
+      <div class="auth-card">
+        <h1>欢迎回来</h1>
+        <div class="auth-tabs">
+          <button class="auth-tab active" data-tab="loginTab">登录</button>
+          <button class="auth-tab" data-tab="registerTab">注册</button>
+        </div>
+
+        <form class="admin-form auth-form" id="loginTab" style="display:block">
+          <h2>登录</h2>
+          <div class="form-group">
+            <label for="loginUsername">用户名</label>
+            <input type="text" id="loginUsername" placeholder="请输入用户名" required>
+          </div>
+          <div class="form-group">
+            <label for="loginPassword">密码</label>
+            <input type="password" id="loginPassword" placeholder="请输入密码" required>
+          </div>
+          <button type="submit" class="btn btn-primary">登录</button>
+          <p class="form-hint" id="loginHint"></p>
+        </form>
+
+        <form class="admin-form auth-form" id="registerTab" style="display:none">
+          <h2>注册新账号</h2>
+          <div class="form-group">
+            <label for="regUsername">用户名</label>
+            <input type="text" id="regUsername" placeholder="请设置用户名" required>
+          </div>
+          <div class="form-group">
+            <label for="regPassword">密码</label>
+            <input type="password" id="regPassword" placeholder="请设置密码" required>
+          </div>
+          <div class="form-group">
+            <label for="regConfirm">确认密码</label>
+            <input type="password" id="regConfirm" placeholder="再次输入密码" required>
+          </div>
+          <button type="submit" class="btn btn-primary">注册</button>
+          <p class="form-hint" id="registerHint"></p>
+        </form>
+      </div>
+    </section>
+
+    <!-- Admin panel -->
+    <section id="adminPanel" class="admin-section" style="display:none">
+      <div class="admin-header">
+        <div>
+          <h1>发布文章</h1>
+          <p class="form-hint" id="userInfo"></p>
+        </div>
+        <button id="logoutBtn" class="btn btn-outline">退出登录</button>
+      </div>
+
+      <form class="admin-form" id="postForm">
+        <div class="form-group">
+          <label for="postTitle">标题</label>
+          <input type="text" id="postTitle" placeholder="文章标题" required>
+        </div>
+        <div class="form-group">
+          <label for="postTag">分类标签</label>
+          <select id="postTag">
+            <option value="技术">技术</option>
+            <option value="生活">生活</option>
+            <option value="随笔">随笔</option>
+            <option value="其他">其他</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="postContent">内容</label>
+          <textarea id="postContent" rows="15" placeholder="在此撰写文章内容..." required></textarea>
+        </div>
+        <input type="hidden" id="editId" value="">
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" id="submitBtn">发布文章</button>
+          <button type="button" class="btn btn-outline" id="cancelEditBtn" style="display:none">取消编辑</button>
+        </div>
+      </form>
+
+      <hr class="divider">
+
+      <section class="manage-posts">
+        <h2>已发布文章</h2>
+        <div id="manageList">
+          <p class="loading-text">加载中...</p>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; 2026 My Blog. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
