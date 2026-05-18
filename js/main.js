@@ -56,42 +56,187 @@
 
   // ===== Homepage =====
   var postList = document.getElementById('postList');
+  var searchInput = document.getElementById('searchInput');
+  var searchBtn = document.getElementById('searchBtn');
+  var clearSearchBtn = document.getElementById('clearSearchBtn');
+  var searchResultsInfo = document.getElementById('searchResultsInfo');
+
+  var allPosts = [];
+  var currentSearchTerm = '';
+  var currentPage = 1;
+  const postsPerPage = 10;
+
   if (postList) {
     renderPosts();
 
     async function renderPosts() {
       try {
         var data = await API.get('/api/posts');
-        var posts = data.posts || [];
-        if (posts.length === 0) {
+        allPosts = data.posts || [];
+        if (allPosts.length === 0) {
           postList.innerHTML = '<p class="empty-state">还没有文章，<a href="admin.html">去发布第一篇</a></p>';
           return;
         }
-        var html = '';
-        for (var i = 0; i < posts.length; i++) {
-          var p = posts[i];
-          html += '<article class="post-card">'
-            + '<div class="post-meta">'
-            + '<time datetime="' + p.date + '">' + p.date + '</time>'
-            + '<span class="post-tag">' + escapeHtml(p.tag) + '</span>'
-            + '<span class="post-author">' + escapeHtml(p.author || '') + '</span>'
-            + '</div>'
-            + '<h2 class="post-title"><a href="post.html?id=' + p.id + '">' + escapeHtml(p.title) + '</a></h2>'
-            + '<p class="post-excerpt">' + escapeHtml(p.excerpt) + '</p>'
-            + '<div class="post-footer">'
-            + '<a href="post.html?id=' + p.id + '" class="read-more">阅读更多 →</a>'
-            + '<span class="post-stats">'
-            + '<span class="stat-view">👁 ' + (p.viewCount || 0) + '</span>'
-            + '<span class="stat-like">♡ ' + (p.likeCount || 0) + '</span>'
-            + '<span class="stat-comment">💬 ' + (p.commentCount || 0) + '</span>'
-            + '</span>'
-            + '</div>'
-            + '</article>';
+
+        // 如果正在搜索，显示搜索结果
+        if (currentSearchTerm) {
+          searchPosts();
+        } else {
+          displayPosts(allPosts);
         }
-        postList.innerHTML = html;
       } catch (e) {
         postList.innerHTML = '<p class="empty-state">加载失败：' + escapeHtml(e.message) + '</p>';
       }
+    }
+
+    // 显示文章列表
+    function displayPosts(posts, page = 1) {
+      const startIndex = (page - 1) * postsPerPage;
+      const endIndex = startIndex + postsPerPage;
+      const pagePosts = posts.slice(startIndex, endIndex);
+
+      if (pagePosts.length === 0) {
+        postList.innerHTML = '<p class="empty-state">没有找到相关文章</p>';
+        return;
+      }
+
+      var html = '';
+      for (var i = 0; i < pagePosts.length; i++) {
+        var p = pagePosts[i];
+        html += '<article class="post-card">'
+          + '<div class="post-meta">'
+          + '<time datetime="' + p.date + '">' + p.date + '</time>'
+          + '<span class="post-tag">' + escapeHtml(p.tag) + '</span>'
+          + '<span class="post-author">' + escapeHtml(p.author || '') + '</span>'
+          + '</div>'
+          + '<h2 class="post-title"><a href="post.html?id=' + p.id + '">' + escapeHtml(p.title) + '</a></h2>'
+          + '<p class="post-excerpt">' + escapeHtml(p.excerpt || (function() { const plainText = p.content.replace(/[#*`\[\]()!]/g, '').replace(/\n/g, ' ').trim(); return plainText.length > 200 ? plainText.substring(0, 200) + '...' : plainText; })()) + '</p>'
+          + '<div class="post-footer">'
+          + '<a href="post.html?id=' + p.id + '" class="read-more">阅读更多 →</a>'
+          + '<span class="post-stats">'
+          + '<span class="stat-view">👁 ' + (p.viewCount || 0) + '</span>'
+          + '<span class="stat-like">♡ ' + (p.likeCount || 0) + '</span>'
+          + '<span class="stat-comment">💬 ' + (p.commentCount || 0) + '</span>'
+          + '</span>'
+          + '</div>'
+          + '</article>';
+      }
+      postList.innerHTML = html;
+
+      // 如果有分页，显示分页控件
+      if (posts.length > postsPerPage) {
+        renderPagination(posts.length, page);
+      }
+    }
+
+    // 搜索功能
+    function searchPosts() {
+      const searchTerm = currentSearchTerm.toLowerCase();
+
+      if (!searchTerm) {
+        displayPosts(allPosts);
+        return;
+      }
+
+      const filteredPosts = allPosts.filter(function(post) {
+        return post.title.toLowerCase().includes(searchTerm) ||
+               post.content.toLowerCase().includes(searchTerm) ||
+               (post.excerpt && post.excerpt.toLowerCase().includes(searchTerm));
+      });
+
+      // 更新搜索信息
+      if (searchResultsInfo) {
+        searchResultsInfo.style.display = 'block';
+        searchResultsInfo.textContent = `找到 ${filteredPosts.length} 篇相关文章`;
+      }
+
+      displayPosts(filteredPosts, 1);
+    }
+
+    // 渲染分页
+    function renderPagination(totalPosts, currentPage) {
+      const totalPages = Math.ceil(totalPosts / postsPerPage);
+
+      if (totalPages <= 1) return;
+
+      var paginationHtml = '<div class="pagination">';
+
+      // 上一页
+      if (currentPage > 1) {
+        paginationHtml += '<button class="pagination-btn" data-page="' + (currentPage - 1) + '">‹ 上一页</button>';
+      }
+
+      // 页码
+      for (var i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+          paginationHtml += '<button class="pagination-btn' + (i === currentPage ? ' active' : '') + '" data-page="' + i + '">' + i + '</button>';
+        } else if (i === currentPage - 3 || i === currentPage + 3) {
+          paginationHtml += '<span class="pagination-ellipsis">...</span>';
+        }
+      }
+
+      // 下一页
+      if (currentPage < totalPages) {
+        paginationHtml += '<button class="pagination-btn" data-page="' + (currentPage + 1) + '">下一页 ›</button>';
+      }
+
+      paginationHtml += '</div>';
+
+      postList.innerHTML += paginationHtml;
+
+      // 绑定分页事件
+      document.querySelectorAll('.pagination-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          const page = parseInt(this.dataset.page);
+          currentPage = page;
+          if (currentSearchTerm) {
+            searchPosts();
+          } else {
+            displayPosts(allPosts, page);
+          }
+        });
+      });
+    }
+
+    // 搜索事件
+    if (searchInput && searchBtn) {
+      searchBtn.addEventListener('click', function() {
+        currentSearchTerm = searchInput.value.trim();
+        currentPage = 1;
+        searchPosts();
+      });
+
+      searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          currentSearchTerm = searchInput.value.trim();
+          currentPage = 1;
+          searchPosts();
+        }
+      });
+
+      // 清除搜索
+      if (clearSearchBtn) {
+        clearSearchBtn.addEventListener('click', function() {
+          searchInput.value = '';
+          currentSearchTerm = '';
+          currentPage = 1;
+          if (searchResultsInfo) {
+            searchResultsInfo.style.display = 'none';
+          }
+          displayPosts(allPosts);
+        });
+      }
+
+      // 搜索框聚焦
+      searchInput.addEventListener('focus', function() {
+        if (this.value) {
+          clearSearchBtn.style.display = 'block';
+        }
+      });
+
+      searchInput.addEventListener('input', function() {
+        clearSearchBtn.style.display = this.value ? 'block' : 'none';
+      });
     }
   }
 
@@ -135,7 +280,7 @@
           + '</div>'
           + '</div>'
           + '</header>'
-          + '<div class="post-full-body">' + post.content.replace(/\n/g, '<br>') + '</div>';
+          + '<div class="post-full-body">' + MarkdownRenderer.render(post.content) + '</div>';
         postContent.innerHTML = html;
         document.title = post.title + ' - 我的博客';
 
@@ -464,7 +609,13 @@
         var activities = actData.activities || [];
 
         var html = '<div class="profile-card">'
-          + '<div class="profile-avatar"><span class="avatar-placeholder-large">' + username.charAt(0).toUpperCase() + '</span></div>'
+          + '<div class="profile-avatar-container">'
+          + '<div class="profile-avatar" id="profileAvatar">'
+          + '<span class="avatar-placeholder-large">' + username.charAt(0).toUpperCase() + '</span>'
+          + '</div>'
+          + '<button class="avatar-upload-btn" id="avatarUploadBtn" title="更换头像">📷</button>'
+          + '<input type="file" id="avatarInput" accept="image/*" style="display: none;">'
+          + '</div>'
           + '<h1>' + escapeHtml(username) + '</h1>'
           + '<p class="profile-join">注册于 ' + (user.created || '') + '</p>'
           + '</div>'
@@ -501,9 +652,85 @@
 
         html += '</section>';
         profilePage.innerHTML = html;
+
+        // 初始化头像上传功能
+        initAvatarUpload();
       } catch (e) {
         profilePage.innerHTML = '<p class="empty-state">加载失败：' + escapeHtml(e.message) + '</p>';
       }
+    }
+  }
+
+  // ===== Avatar Upload =====
+  function initAvatarUpload() {
+    const avatarBtn = document.getElementById('avatarUploadBtn');
+    const avatarInput = document.getElementById('avatarInput');
+    const avatar = document.getElementById('profileAvatar');
+
+    if (!avatarBtn || !avatarInput || !avatar) return;
+
+    // 点击按钮触发文件选择
+    avatarBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      avatarInput.click();
+    });
+
+    // 文件选择
+    avatarInput.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        handleAvatarUpload(file);
+      }
+    });
+
+    // 拖拽上传
+    avatar.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      this.style.borderColor = '#6366f1';
+    });
+
+    avatar.addEventListener('dragleave', function(e) {
+      e.preventDefault();
+      this.style.borderColor = '';
+    });
+
+    avatar.addEventListener('drop', function(e) {
+      e.preventDefault();
+      this.style.borderColor = '';
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) {
+        handleAvatarUpload(file);
+      }
+    });
+  }
+
+  async function handleAvatarUpload(file) {
+    const avatar = document.getElementById('profileAvatar');
+    const avatarBtn = document.getElementById('avatarUploadBtn');
+
+    try {
+      const result = await ImageUploader.uploadAvatar(file);
+
+      // 更新头像显示
+      const img = document.createElement('img');
+      img.src = ImageUploader.getImageUrl(result.filename);
+      img.alt = '头像';
+
+      avatar.innerHTML = '';
+      avatar.appendChild(img);
+
+      // 提示用户
+      const message = document.createElement('div');
+      message.style.cssText = 'position: fixed; top: 20px; right: 20px; background: var(--accent); color: white; padding: 12px 20px; border-radius: var(--radius-sm); box-shadow: var(--card-shadow-hover); z-index: 1000;';
+      message.textContent = '头像更新成功！';
+      document.body.appendChild(message);
+
+      setTimeout(() => {
+        message.remove();
+      }, 3000);
+
+    } catch (error) {
+      alert('头像上传失败：' + error.message);
     }
   }
 })();

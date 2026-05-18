@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>文章 - 我的博客</title>
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="node_modules/highlight.js/styles/github.css">
 </head>
 <body>
   <header class="header">
@@ -48,6 +49,18 @@
   </footer>
 
   <script src="js/api.js"></script>
+  <script src="js/markdown.js"></script>
+  <script src="node_modules/marked/marked.min.js"></script>
+  <script src="node_modules/highlight.js/highlight.min.js"></script>
   <script src="js/main.js"></script>
+  <script>
+    // 初始化代码高亮
+    document.addEventListener('DOMContentLoaded', function() {
+      const codeBlocks = document.querySelectorAll('pre code');
+      codeBlocks.forEach(function(block) {
+        hljs.highlightElement(block);
+      });
+    });
+  </script>
 </body>
 </html>
