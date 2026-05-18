@@ -296,6 +296,14 @@ app.get('/api/activities/:username', (req, res) => {
 });
 
 // ============================
+//  ROOT ROUTE
+// ============================
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// ============================
 //  START
 // ============================
 
