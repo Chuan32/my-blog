@@ -85,12 +85,13 @@
         </div>
         <div class="form-group">
           <label for="postTag">分类标签</label>
-          <select id="postTag">
-            <option value="技术">技术</option>
-            <option value="生活">生活</option>
-            <option value="随笔">随笔</option>
-            <option value="其他">其他</option>
-          </select>
+          <input type="text" id="postTag" placeholder="例如：技术、生活、随笔..." value="技术" list="tagSuggestions">
+          <datalist id="tagSuggestions">
+            <option value="技术">
+            <option value="生活">
+            <option value="随笔">
+            <option value="其他">
+          </datalist>
         </div>
         <div class="form-group">
           <label for="postContent">内容</label>

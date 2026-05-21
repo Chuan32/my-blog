@@ -1,0 +1,71 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg-primary: #f8f9fe;
+  --bg-secondary: #ffffff;
+  --text-primary: #1e1b4b;
+  --text-secondary: #6366a1;
+  --border-color: #e8e8f0;
+  --accent: #6366f1;
+  --accent-light: #818cf8;
+  --accent-dark: #4f46e5;
+  --accent-gradient: linear-gradient(135deg, #6366f1, #8b5cf6);
+  --card-shadow: 0 1px 3px rgba(99, 102, 241, 0.06), 0 4px 16px rgba(99, 102, 241, 0.04);
+  --card-shadow-hover: 0 4px 12px rgba(99, 102, 241, 0.1), 0 12px 40px rgba(99, 102, 241, 0.06);
+  --max-width: 1200px;
+  --radius: 14px;
+  --radius-sm: 8px;
+}
+
+[data-theme="dark"] {
+  --bg-primary: #0f0e1a;
+  --bg-secondary: #1a1932;
+  --text-primary: #e8e6f5;
+  --text-secondary: #9492c9;
+  --border-color: #2a2848;
+  --card-shadow: 0 1px 3px rgba(0,0,0,0.2), 0 4px 16px rgba(0,0,0,0.15);
+  --card-shadow-hover: 0 4px 12px rgba(0,0,0,0.3), 0 12px 40px rgba(0,0,0,0.2);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: var(--bg-primary);
+  background-image:
+    radial-gradient(ellipse at 15% 20%, rgba(99, 102, 241, 0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 30%, rgba(139, 92, 246, 0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 70%, rgba(99, 102, 241, 0.03) 0%, transparent 50%);
+  color: var(--text-primary);
+  line-height: 1.75;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+[data-theme="dark"] body {
+  background-image:
+    radial-gradient(ellipse at 15% 20%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 30%, rgba(139, 92, 246, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 70%, rgba(99, 102, 241, 0.04) 0%, transparent 50%);
+}
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
+
+.container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 24px;
+  width: 100%;
+}

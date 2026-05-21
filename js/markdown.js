@@ -83,7 +83,7 @@ var MarkdownRenderer = {
     // 生成文章摘要
     generateExcerpt: function(markdown, maxLength) {
         const plainText = markdown
-            .replace(/[#*`\[\]()!]/g, '')
+            .replace(/[#*`[\]()!]/g, '')
             .replace(/\n/g, ' ')
             .trim();
         return plainText.length > maxLength ? plainText.substring(0, maxLength) + '...' : plainText;

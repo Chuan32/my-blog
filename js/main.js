@@ -46,32 +46,45 @@
     }
   };
 
-  // ===== Nav profile link =====
-  var navProfile = document.getElementById('navProfile');
-  if (navProfile) {
-    if (Auth.isLoggedIn()) {
-      navProfile.style.display = 'inline';
-    }
-  }
-
+  
   // ===== Homepage =====
   var postList = document.getElementById('postList');
   var searchInput = document.getElementById('searchInput');
   var searchBtn = document.getElementById('searchBtn');
   var clearSearchBtn = document.getElementById('clearSearchBtn');
   var searchResultsInfo = document.getElementById('searchResultsInfo');
+  var tagFilter = document.getElementById('tagFilter');
 
   var allPosts = [];
   var currentSearchTerm = '';
   var currentPage = 1;
+  var currentTag = '全部';
   const postsPerPage = 10;
 
   if (postList) {
+    // Load tag filter
+    if (tagFilter) {
+      API.get('/api/tags').then(function(data) {
+        var tags = data.tags || [];
+        for (var i = 0; i < tags.length; i++) {
+          var btn = document.createElement('button');
+          btn.className = 'tag-filter-btn';
+          btn.dataset.tag = tags[i];
+          btn.textContent = tags[i];
+          tagFilter.appendChild(btn);
+        }
+      }).catch(function() {});
+    }
+
     renderPosts();
 
     async function renderPosts() {
       try {
-        var data = await API.get('/api/posts');
+        var url = '/api/posts';
+        if (currentTag && currentTag !== '全部') {
+          url += '?tag=' + encodeURIComponent(currentTag);
+        }
+        var data = await API.get(url);
         allPosts = data.posts || [];
         if (allPosts.length === 0) {
           postList.innerHTML = '<p class="empty-state">还没有文章，<a href="admin.html">去发布第一篇</a></p>';
@@ -110,7 +123,7 @@
           + '<span class="post-author">' + escapeHtml(p.author || '') + '</span>'
           + '</div>'
           + '<h2 class="post-title"><a href="post.html?id=' + p.id + '">' + escapeHtml(p.title) + '</a></h2>'
-          + '<p class="post-excerpt">' + escapeHtml(p.excerpt || (function() { const plainText = p.content.replace(/[#*`\[\]()!]/g, '').replace(/\n/g, ' ').trim(); return plainText.length > 200 ? plainText.substring(0, 200) + '...' : plainText; })()) + '</p>'
+          + '<p class="post-excerpt">' + escapeHtml(p.excerpt || (function() { const plainText = p.content.replace(/[#*`[\]()!]/g, '').replace(/\n/g, ' ').trim(); return plainText.length > 200 ? plainText.substring(0, 200) + '...' : plainText; })()) + '</p>'
           + '<div class="post-footer">'
           + '<a href="post.html?id=' + p.id + '" class="read-more">阅读更多 →</a>'
           + '<span class="post-stats">'
@@ -237,6 +250,21 @@
       searchInput.addEventListener('input', function() {
         clearSearchBtn.style.display = this.value ? 'block' : 'none';
       });
+
+      // 标签筛选点击
+      if (tagFilter) {
+        tagFilter.addEventListener('click', function(e) {
+          if (e.target.classList.contains('tag-filter-btn')) {
+            tagFilter.querySelectorAll('.tag-filter-btn').forEach(function(b) {
+              b.classList.remove('active');
+            });
+            e.target.classList.add('active');
+            currentTag = e.target.dataset.tag;
+            currentPage = 1;
+            renderPosts();
+          }
+        });
+      }
     }
   }
 
@@ -303,11 +331,6 @@
         likeCount.textContent = data.count;
 
         if (Auth.isLoggedIn()) {
-          var postData = await API.get('/api/posts/' + postId);
-          // We need to check if current user liked - use the like check
-          var likeData = await API.get('/api/posts/' + postId + '/like');
-          // Actually need a way to check if user liked. Let me add that to the response.
-          // For now, we'll track locally
           var liked = localStorage.getItem('liked_' + postId) === 'true';
           if (liked) {
             likeIcon.textContent = '♥';
@@ -488,7 +511,8 @@
         e.preventDefault();
         var title = document.getElementById('postTitle').value.trim();
         var tag = document.getElementById('postTag').value;
-        var content = document.getElementById('postContent').value.trim();
+        var postContentEl = document.getElementById('postContent');
+        var content = (typeof simplemde !== 'undefined' && simplemde ? simplemde.value() : postContentEl.value).trim();
         if (!title || !content) { alert('请填写标题和内容'); return; }
 
         var editId = editIdInput.value;
@@ -550,7 +574,11 @@
           if (!post) return;
           document.getElementById('postTitle').value = post.title;
           document.getElementById('postTag').value = post.tag;
-          document.getElementById('postContent').value = post.content;
+          if (typeof simplemde !== 'undefined' && simplemde) {
+            simplemde.value(post.content);
+          } else {
+            document.getElementById('postContent').value = post.content;
+          }
           editIdInput.value = id;
           submitBtn.textContent = '更新文章';
           cancelBtn.style.display = 'inline-block';
@@ -596,25 +624,23 @@
         var myComments = allComments.filter(function (c) { return c.author === username; });
 
         var totalViews = 0;
-        for (var i = 0; i < myPosts.length; i++) {
-          totalViews += myPosts[i].viewCount || 0;
+        for (var vi = 0; vi < myPosts.length; vi++) {
+          totalViews += myPosts[vi].viewCount || 0;
         }
 
         var totalLikes = 0;
-        for (var i = 0; i < myPosts.length; i++) {
-          totalLikes += myPosts[i].likeCount || 0;
+        for (var li = 0; li < myPosts.length; li++) {
+          totalLikes += myPosts[li].likeCount || 0;
         }
 
-        var actData = await API.get('/api/activities/' + username);
-        var activities = actData.activities || [];
+        // var actData = await API.get('/api/activities/' + username);
+        var activities = [];
 
         var html = '<div class="profile-card">'
           + '<div class="profile-avatar-container">'
           + '<div class="profile-avatar" id="profileAvatar">'
           + '<span class="avatar-placeholder-large">' + username.charAt(0).toUpperCase() + '</span>'
           + '</div>'
-          + '<button class="avatar-upload-btn" id="avatarUploadBtn" title="更换头像">📷</button>'
-          + '<input type="file" id="avatarInput" accept="image/*" style="display: none;">'
           + '</div>'
           + '<h1>' + escapeHtml(username) + '</h1>'
           + '<p class="profile-join">注册于 ' + (user.created || '') + '</p>'
@@ -629,108 +655,17 @@
 
           + '<section class="profile-activity"><h2>我的动态</h2>';
 
-        if (activities.length === 0) {
+        if (true) {  // 暂无动态
           html += '<p class="empty-state">暂无动态</p>';
-        } else {
-          html += '<div class="activity-list">';
-          for (var i = 0; i < activities.length; i++) {
-            var a = activities[i];
-            var icon = a.type === 'publish' ? '📝' : (a.type === 'comment' ? '💬' : '♡');
-            var actionText = a.type === 'publish' ? '发布了文章' : (a.type === 'comment' ? '评论了文章' : '赞了文章');
-            var link = 'post.html?id=' + a.targetId;
-            html += '<div class="activity-item">'
-              + '<span class="activity-icon">' + icon + '</span>'
-              + '<div class="activity-body">'
-              + '<p><strong>' + escapeHtml(a.username) + '</strong> ' + actionText
-              + ' <a href="' + link + '">' + escapeHtml(a.detail || '#') + '</a></p>'
-              + '<time>' + a.date + '</time>'
-              + '</div>'
-              + '</div>';
-          }
-          html += '</div>';
         }
 
         html += '</section>';
         profilePage.innerHTML = html;
 
-        // 初始化头像上传功能
-        initAvatarUpload();
       } catch (e) {
         profilePage.innerHTML = '<p class="empty-state">加载失败：' + escapeHtml(e.message) + '</p>';
       }
     }
   }
 
-  // ===== Avatar Upload =====
-  function initAvatarUpload() {
-    const avatarBtn = document.getElementById('avatarUploadBtn');
-    const avatarInput = document.getElementById('avatarInput');
-    const avatar = document.getElementById('profileAvatar');
-
-    if (!avatarBtn || !avatarInput || !avatar) return;
-
-    // 点击按钮触发文件选择
-    avatarBtn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      avatarInput.click();
-    });
-
-    // 文件选择
-    avatarInput.addEventListener('change', function(e) {
-      const file = e.target.files[0];
-      if (file) {
-        handleAvatarUpload(file);
-      }
-    });
-
-    // 拖拽上传
-    avatar.addEventListener('dragover', function(e) {
-      e.preventDefault();
-      this.style.borderColor = '#6366f1';
-    });
-
-    avatar.addEventListener('dragleave', function(e) {
-      e.preventDefault();
-      this.style.borderColor = '';
-    });
-
-    avatar.addEventListener('drop', function(e) {
-      e.preventDefault();
-      this.style.borderColor = '';
-      const file = e.dataTransfer.files[0];
-      if (file && file.type.startsWith('image/')) {
-        handleAvatarUpload(file);
-      }
-    });
-  }
-
-  async function handleAvatarUpload(file) {
-    const avatar = document.getElementById('profileAvatar');
-    const avatarBtn = document.getElementById('avatarUploadBtn');
-
-    try {
-      const result = await ImageUploader.uploadAvatar(file);
-
-      // 更新头像显示
-      const img = document.createElement('img');
-      img.src = ImageUploader.getImageUrl(result.filename);
-      img.alt = '头像';
-
-      avatar.innerHTML = '';
-      avatar.appendChild(img);
-
-      // 提示用户
-      const message = document.createElement('div');
-      message.style.cssText = 'position: fixed; top: 20px; right: 20px; background: var(--accent); color: white; padding: 12px 20px; border-radius: var(--radius-sm); box-shadow: var(--card-shadow-hover); z-index: 1000;';
-      message.textContent = '头像更新成功！';
-      document.body.appendChild(message);
-
-      setTimeout(() => {
-        message.remove();
-      }, 3000);
-
-    } catch (error) {
-      alert('头像上传失败：' + error.message);
-    }
-  }
 })();

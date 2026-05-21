@@ -5,17 +5,25 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "lint": "eslint server.js js/ --fix",
+    "lint:check": "eslint server.js js/"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "express": "^4.18.2",
+    "express-rate-limit": "^8.5.2",
+    "helmet": "^8.1.0",
     "highlight.js": "^11.11.1",
     "jsonwebtoken": "^9.0.2",
     "marked": "^18.0.3",
     "multer": "^2.1.1",
     "simplemde": "^1.11.2",
     "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.4.0"
   }
 }
