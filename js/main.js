@@ -633,9 +633,6 @@
           totalLikes += myPosts[li].likeCount || 0;
         }
 
-        // var actData = await API.get('/api/activities/' + username);
-        var activities = [];
-
         var html = '<div class="profile-card">'
           + '<div class="profile-avatar-container">'
           + '<div class="profile-avatar" id="profileAvatar">'
@@ -653,13 +650,9 @@
           + '<div class="stat-item"><strong>' + totalLikes + '</strong><span>获赞</span></div>'
           + '</div>'
 
-          + '<section class="profile-activity"><h2>我的动态</h2>';
-
-        if (true) {  // 暂无动态
-          html += '<p class="empty-state">暂无动态</p>';
-        }
-
-        html += '</section>';
+          + '<section class="profile-activity"><h2>我的动态</h2>'
+          + '<p class="empty-state">暂无动态</p>'
+          + '</section>';
         profilePage.innerHTML = html;
 
       } catch (e) {
