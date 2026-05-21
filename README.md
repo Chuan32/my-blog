@@ -24,13 +24,24 @@
 
 ## 快速部署
 
-### 部署到 Render（推荐）
+### 部署到 Koyeb（推荐，无需信用卡）
 
-1. 在 [Render](https://render.com) 注册免费账号
-2. 点击 **New +** → **Web Service**
-3. 连接 GitHub 仓库 `Chuan32/my-blog`
-4. Render 会自动识别 `render.yaml` 配置，直接点击 **Apply**
-5. 等待部署完成，即可通过 Render 分配的 URL 访问
+1. 在 [Koyeb](https://app.koyeb.com) 用 GitHub 账号登录
+2. 点击 **Create App**
+3. 选择 **GitHub**，连接 `Chuan32/my-blog` 仓库
+4. 填下以下配置：
+
+   | 字段 | 填写内容 |
+   |------|---------|
+   | **Name** | `my-blog` |
+   | **Builder** | `Dockerfile` 或 `Buildpacks`（选 Buildpacks） |
+   | **Build Command** | `npm ci` |
+   | **Run Command** | `node server.js` |
+   | **Port** | `8000` |
+   | **Environment variables** | 添加 `JWT_SECRET`，值点 Generate 自动生成 |
+
+5. 点击 **Deploy**，等待 2-3 分钟
+6. 部署完成会显示 `https://my-blog.koyeb.app` 格式的链接
 
 ### 本地运行
 
@@ -57,4 +68,4 @@ node server.js
 
 部署后可访问：
 - https://chuan32.github.io/my-blog/（静态版，仅前端展示）
-- Render 分配的 URL（完整功能版）
+- Koyeb 分配的 URL（完整功能版）
