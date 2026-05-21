@@ -24,24 +24,15 @@
 
 ## 快速部署
 
-### 部署到 Koyeb（推荐，无需信用卡）
+### 部署到 Zeabur（推荐，国内可访问，无需信用卡）
 
-1. 在 [Koyeb](https://app.koyeb.com) 用 GitHub 账号登录
-2. 点击 **Create App**
-3. 选择 **GitHub**，连接 `Chuan32/my-blog` 仓库
-4. 填下以下配置：
-
-   | 字段 | 填写内容 |
-   |------|---------|
-   | **Name** | `my-blog` |
-   | **Builder** | `Dockerfile` 或 `Buildpacks`（选 Buildpacks） |
-   | **Build Command** | `npm ci` |
-   | **Run Command** | `node server.js` |
-   | **Port** | `8000` |
-   | **Environment variables** | 添加 `JWT_SECRET`，值点 Generate 自动生成 |
-
-5. 点击 **Deploy**，等待 2-3 分钟
-6. 部署完成会显示 `https://my-blog.koyeb.app` 格式的链接
+1. 打开 https://zeabur.com ，用 GitHub 账号登录
+2. 点击 **新建项目** → 输入项目名（如 `my-blog`）
+3. 点击 **添加服务** → 选择 **GitHub**
+4. 授权后选择仓库 `Chuan32/my-blog`，分支 `main`
+5. Zeabur 会自动检测 Node.js，开始部署
+6. 在服务页面添加**环境变量**：`JWT_SECRET` → 值点 **生成随机值**
+7. 部署完成后，点击 **生成域名** 获得公网访问链接
 
 ### 本地运行
 
@@ -68,4 +59,4 @@ node server.js
 
 部署后可访问：
 - https://chuan32.github.io/my-blog/（静态版，仅前端展示）
-- Koyeb 分配的 URL（完整功能版）
+- Zeabur 分配的域名（完整功能版）
